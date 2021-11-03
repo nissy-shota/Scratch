@@ -1,2 +1,3 @@
 # Scratch
-scratch model in Pytorch
+scratch DeepLearnig and machineLearning model.
+useing python for my learning.
