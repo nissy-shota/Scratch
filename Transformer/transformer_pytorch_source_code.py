@@ -13,7 +13,7 @@ from .linear import Linear
 from .normalization import LayerNorm
 
 
-[docs]class Transformer(Module):
+class Transformer(Module):
     r"""A transformer model. User is able to modify the attributes as needed. The architecture
     is based on the paper "Attention Is All You Need". Ashish Vaswani, Noam Shazeer,
     Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, Lukasz Kaiser, and
@@ -82,7 +82,7 @@ from .normalization import LayerNorm
 
         self.batch_first = batch_first
 
-[docs]    def forward(self, src: Tensor, tgt: Tensor, src_mask: Optional[Tensor] = None, tgt_mask: Optional[Tensor] = None,
+    def forward(self, src: Tensor, tgt: Tensor, src_mask: Optional[Tensor] = None, tgt_mask: Optional[Tensor] = None,
                 memory_mask: Optional[Tensor] = None, src_key_padding_mask: Optional[Tensor] = None,
                 tgt_key_padding_mask: Optional[Tensor] = None, memory_key_padding_mask: Optional[Tensor] = None) -> Tensor:
         r"""Take in and process masked source/target sequences.
@@ -144,14 +144,12 @@ from .normalization import LayerNorm
                               memory_key_padding_mask=memory_key_padding_mask)
         return output
 
-
-[docs]    @staticmethod
+    @staticmethod
     def generate_square_subsequent_mask(sz: int) -> Tensor:
         r"""Generate a square mask for the sequence. The masked positions are filled with float('-inf').
             Unmasked positions are filled with float(0.0).
         """
         return torch.triu(torch.full((sz, sz), float('-inf')), diagonal=1)
-
 
     def _reset_parameters(self):
         r"""Initiate parameters in the transformer model."""
@@ -161,8 +159,7 @@ from .normalization import LayerNorm
                 xavier_uniform_(p)
 
 
-
-[docs]class TransformerEncoder(Module):
+class TransformerEncoder(Module):
     r"""TransformerEncoder is a stack of N encoder layers
 
     Args:
@@ -184,7 +181,7 @@ from .normalization import LayerNorm
         self.num_layers = num_layers
         self.norm = norm
 
-[docs]    def forward(self, src: Tensor, mask: Optional[Tensor] = None, src_key_padding_mask: Optional[Tensor] = None) -> Tensor:
+    def forward(self, src: Tensor, mask: Optional[Tensor] = None, src_key_padding_mask: Optional[Tensor] = None) -> Tensor:
         r"""Pass the input through the encoder layers in turn.
 
         Args:
@@ -206,8 +203,7 @@ from .normalization import LayerNorm
         return output
 
 
-
-[docs]class TransformerDecoder(Module):
+class TransformerDecoder(Module):
     r"""TransformerDecoder is a stack of N decoder layers
 
     Args:
@@ -230,7 +226,7 @@ from .normalization import LayerNorm
         self.num_layers = num_layers
         self.norm = norm
 
-[docs]    def forward(self, tgt: Tensor, memory: Tensor, tgt_mask: Optional[Tensor] = None,
+    def forward(self, tgt: Tensor, memory: Tensor, tgt_mask: Optional[Tensor] = None,
                 memory_mask: Optional[Tensor] = None, tgt_key_padding_mask: Optional[Tensor] = None,
                 memory_key_padding_mask: Optional[Tensor] = None) -> Tensor:
         r"""Pass the inputs (and mask) through the decoder layer in turn.
@@ -259,8 +255,7 @@ from .normalization import LayerNorm
 
         return output
 
-
-[docs]class TransformerEncoderLayer(Module):
+class TransformerEncoderLayer(Module):
     r"""TransformerEncoderLayer is made up of self-attn and feedforward network.
     This standard encoder layer is based on the paper "Attention Is All You Need".
     Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez,
@@ -277,7 +272,7 @@ from .normalization import LayerNorm
             ("relu" or "gelu") or a unary callable. Default: relu
         layer_norm_eps: the eps value in layer normalization components (default=1e-5).
         batch_first: If ``True``, then the input and output tensors are provided
-            as (batch, seq, feature). Default: ``False``.
+            as (batch, seq, feature). Default: ``False`` (seq, batch, feature).
         norm_first: if ``True``, layer norm is done prior to attention and feedforward
             operations, respectivaly. Otherwise it's done after. Default: ``False`` (after).
 
@@ -293,8 +288,9 @@ from .normalization import LayerNorm
     """
     __constants__ = ['batch_first', 'norm_first']
 
-    def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1, activation=F.relu,
-                 layer_norm_eps=1e-5, batch_first=False, norm_first=False,
+    def __init__(self, d_model: int, nhead: int, dim_feedforward: int = 2048, dropout: float = 0.1,
+                 activation: Union[str, Callable[[Tensor], Tensor]] = F.relu,
+                 layer_norm_eps: float = 1e-5, batch_first: bool = False, norm_first: bool = False,
                  device=None, dtype=None) -> None:
         factory_kwargs = {'device': device, 'dtype': dtype}
         super(TransformerEncoderLayer, self).__init__()
@@ -322,7 +318,7 @@ from .normalization import LayerNorm
             state['activation'] = F.relu
         super(TransformerEncoderLayer, self).__setstate__(state)
 
-[docs]    def forward(self, src: Tensor, src_mask: Optional[Tensor] = None, src_key_padding_mask: Optional[Tensor] = None) -> Tensor:
+    def forward(self, src: Tensor, src_mask: Optional[Tensor] = None, src_key_padding_mask: Optional[Tensor] = None) -> Tensor:
         r"""Pass the input through the encoder layer.
 
         Args:
@@ -346,7 +342,6 @@ from .normalization import LayerNorm
 
         return x
 
-
     # self-attention block
     def _sa_block(self, x: Tensor,
                   attn_mask: Optional[Tensor], key_padding_mask: Optional[Tensor]) -> Tensor:
@@ -362,8 +357,7 @@ from .normalization import LayerNorm
         return self.dropout2(x)
 
 
-
-[docs]class TransformerDecoderLayer(Module):
+class TransformerDecoderLayer(Module):
     r"""TransformerDecoderLayer is made up of self-attn, multi-head-attn and feedforward network.
     This standard decoder layer is based on the paper "Attention Is All You Need".
     Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez,
@@ -380,7 +374,7 @@ from .normalization import LayerNorm
             ("relu" or "gelu") or a unary callable. Default: relu
         layer_norm_eps: the eps value in layer normalization components (default=1e-5).
         batch_first: If ``True``, then the input and output tensors are provided
-            as (batch, seq, feature). Default: ``False``.
+            as (batch, seq, feature). Default: ``False`` (seq, batch, feature).
         norm_first: if ``True``, layer norm is done prior to self attention, multihead
             attention and feedforward operations, respectivaly. Otherwise it's done after.
             Default: ``False`` (after).
@@ -399,8 +393,9 @@ from .normalization import LayerNorm
     """
     __constants__ = ['batch_first', 'norm_first']
 
-    def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1, activation=F.relu,
-                 layer_norm_eps=1e-5, batch_first=False, norm_first=False,
+    def __init__(self, d_model: int, nhead: int, dim_feedforward: int = 2048, dropout: float = 0.1,
+                 activation: Union[str, Callable[[Tensor], Tensor]] = F.relu,
+                 layer_norm_eps: float = 1e-5, batch_first: bool = False, norm_first: bool = False,
                  device=None, dtype=None) -> None:
         factory_kwargs = {'device': device, 'dtype': dtype}
         super(TransformerDecoderLayer, self).__init__()
@@ -432,7 +427,7 @@ from .normalization import LayerNorm
             state['activation'] = F.relu
         super(TransformerDecoderLayer, self).__setstate__(state)
 
-[docs]    def forward(self, tgt: Tensor, memory: Tensor, tgt_mask: Optional[Tensor] = None, memory_mask: Optional[Tensor] = None,
+    def forward(self, tgt: Tensor, memory: Tensor, tgt_mask: Optional[Tensor] = None, memory_mask: Optional[Tensor] = None,
                 tgt_key_padding_mask: Optional[Tensor] = None, memory_key_padding_mask: Optional[Tensor] = None) -> Tensor:
         r"""Pass the inputs (and mask) through the decoder layer.
 
@@ -461,7 +456,6 @@ from .normalization import LayerNorm
 
         return x
 
-
     # self-attention block
     def _sa_block(self, x: Tensor,
                   attn_mask: Optional[Tensor], key_padding_mask: Optional[Tensor]) -> Tensor:
@@ -484,7 +478,6 @@ from .normalization import LayerNorm
     def _ff_block(self, x: Tensor) -> Tensor:
         x = self.linear2(self.dropout(self.activation(self.linear1(x))))
         return self.dropout3(x)
-
 
 
 def _get_clones(module, N):
